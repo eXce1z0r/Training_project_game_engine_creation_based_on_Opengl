@@ -1,0 +1,17 @@
+SkyBoxVertexShader
+in - variables by which we put info into shader
+out - variables which values we returns as a result
+sampler2D - variables which used to get images(binded to GL13.GL_TEXTURE)
+uniform - variables which can be changed from a programm at time when it works
+
+in
+	-position - position of object vertex at 3d space
+
+out
+	-textureCoords - used to store current vertex coordinates(x,y,z) by which will getting color for current vertex from point at texture with coordinates x,y,z
+		calculating:
+			textureCoords = position;// because the vertex positions exactly the same as a direction vector which used for sampling the cube map
+
+uniform
+
+	-viewMatrix - store negative camera position(using to move objects in opposite side from the camera moving side for creating camera movement effect). Responses for movement object relative to the camera, and also for its rotation relative to the camera.

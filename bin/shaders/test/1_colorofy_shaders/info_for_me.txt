@@ -1,0 +1,2 @@
+colour = vec3(position.x+0.5,1.0,position.y+0.5); в TEST_vertexShader_colorofy.txt отвечает за окрас определенной точки в зависимости от еЄ местоположени€.
+gl_Position = vec4(position.x,position.y,position.z,1.0);  в TEST_vertexShader_colorofy.txt отвечает за местоположение  ¬јƒ–ј“ј ƒЋя ќ –ј— », должно совпадать с реальным квадратом, иначе не красит.

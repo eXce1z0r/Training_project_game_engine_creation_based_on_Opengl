@@ -1,0 +1,16 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 06.03.2017 00:14:37
+
+newmtl Material__25
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5880 0.5880 0.5880
+	Kd 0.5880 0.5880 0.5880
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka D:\hdd\vladichka\my_projects\game_mmo_survival\guides\ThinMatrix\OpenGL 3D Game Tutorial\OpenGL 3D Game Tutorial 15  Transparency\res\fern.png
+	map_Kd D:\hdd\vladichka\my_projects\game_mmo_survival\guides\ThinMatrix\OpenGL 3D Game Tutorial\OpenGL 3D Game Tutorial 15  Transparency\res\fern.png

@@ -1,0 +1,75 @@
+package shaders;
+
+import org.lwjgl.util.vector.Matrix4f;
+
+import entities.Camera;
+import entities.Light;
+import toolbox.Maths;
+
+public class StaticShader extends ShaderProgram 
+{
+	private static final String VERTEX_FILE = "src/shaders/vertexShader.txt";
+	private static final String FRAGMENT_FILE = "src/shaders/fragmentShader.txt";
+
+	private int location_transformationMatrix;//hold location matrix which store entity transformation in different position
+	private int location_projectionMatrix;//hold location matrix which simulate more realistic object depth/z projection
+	private int location_viewMatrix;//hold location matrix which simulate camera moving
+	private int location_lightPosition;//hold location of the "vec3 lightPosition" uniform variable from vertexShader
+	private int location_lightColour;//hold location of the "vec3 lightColour" uniform variable from fragmentShader
+	private int location_shineDamper;//hold location of the "float shineDamper" uniform variable from fragmentShader
+	private int location_reflectivity;//hold location of the "float reflectivity" uniform variable from fragmentShader
+	
+	public StaticShader() 
+	{
+		super(VERTEX_FILE, FRAGMENT_FILE);
+	}
+
+	@Override
+	protected void bindAttributes()//method using to give ability to the vertexShader get info from variables
+	{
+		super.bindAttribute(0, "position");//binds VBO(attribute from VAO) number 0 to this variable "position"
+		super.bindAttribute(1, "textureCoords");//binds VBO(attribute from VAO) number 1 to this variable "textureCoords"
+		super.bindAttribute(2, "normal");//binds VBO(attribute from VAO) number 2 to this variable "normal"
+	}
+
+	@Override
+	protected void getAllUniformLocations() 
+	{
+		location_transformationMatrix = super.getUniformLocation("transformationMatrix");
+		location_projectionMatrix = super.getUniformLocation("projectionMatrix");
+		location_viewMatrix = super.getUniformLocation("viewMatrix");
+		location_lightPosition = super.getUniformLocation("lightPosition");
+		location_lightColour = super.getUniformLocation("lightColour");
+		location_shineDamper = super.getUniformLocation("shineDamper");
+		location_reflectivity = super.getUniformLocation("reflectivity");
+	}
+	
+	public void loadTransformationMatrix(Matrix4f matrix)
+	{
+		super.loadMatrix(location_transformationMatrix, matrix);
+	}
+	
+	public void loadShineVariables(float damper, float reflectivity)//method using for loading variables "damper" and "reflectivity" into fragment shader 
+	{
+		super.loadFloat(location_shineDamper, damper);
+		super.loadFloat(location_reflectivity, reflectivity);
+	}
+	
+	public void loadLight(Light light)//method which load up values from light variables to the shaders
+	{
+		super.loadVector(location_lightPosition, light.getPosition());//load light.getPosition() to the location_lightPosition
+		super.loadVector(location_lightColour, light.getColour());// load light.getColour() to the location_lightColour
+	}
+	
+	public void loadViewMatrix(Camera camera)
+	{
+		Matrix4f viewMatrix = Maths.createViewMatrix(camera);
+		super.loadMatrix(location_viewMatrix, viewMatrix);
+	}
+	
+	public void loadProjectionMatrix(Matrix4f projection)
+	{
+		super.loadMatrix(location_projectionMatrix, projection);
+	}
+
+}

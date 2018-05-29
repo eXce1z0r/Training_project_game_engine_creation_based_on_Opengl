@@ -1,0 +1,147 @@
+in - variables by which we put info into shader
+out - variables which values we returns as a result
+sampler2D - variables which used to get images(binded to GL13.GL_TEXTURE)
+uniform - variables which can be changed from a programm at time when it works
+
+BOTH:
+	-amountOfLightSourcesForOneVertex - is used to store amount of light sources which affect on vertex color and triangle at all. If we want to shange amount of affecting light sources we need change "amountOfLightSourcesForOneVertex" at "vertexShader", "fragmentShader" and "MAX_LIGHTS" at "StaticShader".
+
+vertexShader, terrainVertexShader:
+	-all "out" variables going to fragmentShader
+
+	-position - position of object vertex at 3d space
+
+	-textureCoords - used to store current vertex coordinates(x,y,z) by which will getting color for current vertex from point at texture with coordinates x,y,z
+
+	-viewMatrix - store negative camera position(using to move objects in opposite side from the camera moving side for creating camera movement effect). Responses for movement object relative to the camera, and also for its rotation relative to the camera.
+
+	-worldPosition - current position of object which include it's current transformation
+
+	-positionRelativeToCam - current vertex position in relation to the camera
+
+	-gl_Position - used to tell OpenGL where on the screen must be located current vertex. Current object position/properties include camera view it's world position and it's projection
+
+	-pass_textureCoordinates - value of choosen images which create texture for object 
+
+	-transformationMatrix - using in calculation when we rotate object or move it
+
+	-projectionMatrix - calculate camera angle of view and this way made object perfomance/view on the screen realistic(resize objects if they move from the screen it becames smaller and if they come closer they becames bigger)
+
+	-lightPosition[n] - stores array of light sources positions. "n"- is amount of light sources. This "n" must be equals "n" at toLightVector[n]
+
+	-density - thickness of fog which hide entities which located further than rendering distance(on the maximum, fog becames very thick so rendering distance decreasing)
+
+	-gradient - determines how quickly visibility decreasing with distance(on the maximum, positions of hided and visible objects very close)
+
+	-pass_textureCoords - calculates position of all vertexes which needed to get one object texture
+		calculating:
+			(textureCoords/numberOfRows) - scale down dimension size of the atlas texture to the one object texture 
+			+ offset - adding space which we need to skip if we need to get next object texture from this texture atlas 
+
+	-surfaceNormal - vertex normal
+		calculating:
+			surfaceNormal = (transformationMatrix * vec4(normal, 0.0)).xyz;// we makeing from normal 4d matrix like a transformationMatrix to multiply them 				and then get from result of their multiply x,y,z dimensions
+
+	-toLightVector[n] - store array of normals from vertex to light sources. "n"- is amount of light sources which will be affecting on current vertex color. Then more light sources than slower game will run 
+
+	-toCameraVector - vector which aimed from point to the camera
+		calculating:
+			toCameraVector = (inverse(viewMatrix) * vec4(0.0,0.0,0.0,1.0)).xyz - worldPosition.xyz;
+			inverse(a); - return inverted value of "a" if it was 1 then it returns -1 and if "a" was equal to -1 then it return 1
+			(inverse(viewMatrix) * vec4(0.0,0.0,0.0,1.0)).xyz - we multiplying to make result of inversing of viewMatrix 4d and get just values of x,y and z axis
+			
+	-visibility - using for count visibility of each vertex based on it's distance from the camera(-distance)
+		calculating: 
+			clamp(a,b,c) - used for retain value of "a" between "b" and "c"	
+	
+	-distance - length between vector from camera to current object
+
+	-useFakeLighting - where we should or shouldn't use fake lighting.
+					To solve ploblen of making more realistic lightning for transparency object. Where the normals of this objects separated from lightning normals by transparent wall. SOLVING THIS PROBLEM BY DIRECTING NORMALS TO THE TOP
+
+	-numberOfRows - amount of object texture at current loaded texture atlas at row. Full size of object textures are(row * height = numberOfRows *numberOfRows )
+
+	-offset - hold "x" and "y" offset
+					
+	-actualNormal - current normal which should use with the object.
+					Can be normal of fake(read about fake lighting from "useFakeLighting").
+		calculating:
+			if(useFakeLighting > 0.5)//"0"- disable fake lightning,		"1"- activate fake lighting 
+			{
+				actualNormal = vec3(0.0, 1.0, 0.0);//directing normals to the top
+			}
+
+
+
+
+
+
+
+
+fragmentShader, fragmentVertexShader:
+
+	-textureCoords - used for getting color of vertex with coordinates "textureCoords" from 2d sampler by coords x,y where 0<x<1; 0<y<1
+
+	-lightColour[n] - used to store light source color. "n"- is amount of sources
+
+	-lightAttenuation[n] - value which responsible for decreasing intensity of the light by the distance(attenuation). "n"- is amount of sources 
+
+	-shineDamper - stored info about how close reflection vector pointing to the camera
+
+	-reflectivity - used to store information about how much light can reflect current point
+
+	-skyColour - used for coloring objects which located further range of rendering at the sky color
+
+	-unitNormal - checking that size of object have no affect on result of dot product(скалярное произведение)
+		calculating:
+			normalize() - make size of normals equal to one, but direction of vectors stays exactly the same
+
+	-unitLightVector - vector which aimed from vertex to light source
+
+	-totalDiffuse - stores summ of diffuse(final light of current pixel from one light source) lightning from all light sources	
+
+	-totalSpecular - stores summ of specular lightning(final specular light value of one light source. Amount of one light source light which reflects from object) from all light sources	
+
+	-float distance - is distance to light source. Calculating by getting length of the "toLightVector"
+		calculating:
+			length(n) - return length of vector "n". 
+	
+	-float attFactor - attenuation calculation. Used to decrease light intensity by the distance. Calculating by using top formula(maybe)
+
+	-nDotl - represent how bright this pixel should be
+		calculating:
+			 dot(a,b) - then more distance between "a" and "b" then less value will be. If "a" and "b" parallel then value will be 1, if ange between them 90 grad 			then value will be 0
+
+	-totalDiffuse = max(totalDiffuse,0.2);// we calculate brightness 4 times that's why texture will be lighter than it's must be, so we set maximum amount of light on object to 0.2.
+
+	-brightness - check that result of variable "nDotl" between 0 and 1 
+		calculating:
+			max(a,b) - compare "a" and "b" and return as a result bigger value
+			IN OUR CASE "b" regulates minimal light which object can reflects
+
+	-unitVectorToCamera - this is the vector which aimed from reflection part to the camera
+
+	-lightDirection - it is vector which aimed from light source to vertex actually this is a vector "unitLightVector" which aimed to another side
+
+	-reflectedLightDirection - this is vector which calculate reflecting light direction by using function reflect(a,b)
+		calculating:
+			reflect(side_from_which_light_shine_on_vertex, vertex_normal) - function which calculate reflection effect
+
+	-specularFactor - calculating by using function dot(a,b) angle between normal 1) reflection of light which calculated in variable "reflectedLightDirection"  2) from 	vertex to camera. Also it indicate how bright the specular light whithout any damping(амортизация/отражение) should be.
+	
+	-textureColour - means the alpha layer value of object texture
+	
+	- if(textureColour.a<0.5)//tests the alpha value of texture colour if it less then 0.5
+		{
+			discard;//remove background at all
+		}
+
+	-dampedFactor - create a material damping
+
+	-out_Color - final colour of pixel
+		calculating:
+			vec4(totalDiffuse,1.0) - making from "totalDiffuse" 4d vector because "texture" is 4d vector
+			texture(textureSampler, pass_textureCoords) - colour of pixel with coords "pass_textureCoords" at "textureSampler" texture
+
+			mix(a,b,c) - used for calculating mix of "a" color and "b" color, where "c" is a proportion of "b" color
+			

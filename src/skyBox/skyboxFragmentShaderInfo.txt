@@ -1,0 +1,46 @@
+SkyBoxFragmentShader
+in - variables by which we put info into shader
+out - variables which values we returns as a result
+sampler2D - variables which used to get images(binded to GL13.GL_TEXTURE)
+uniform - variables which can be changed from a programm at time when it works
+
+in
+	-textureCoords - used for getting color of vertex with coordinates "textureCoords" from samplerCube "cubeMap" with 3d coords where 0<x<1; 0<y<1; 0<z<1. Because "cubeMap" is 3d cube of textures
+
+out
+	-out_Color - final colour of pixel
+		calculating:
+			out_Color = texture(cubeMap, textureCoords);// getting color of pixel at samplerCube for current vertex with coords "textureCoords"
+
+uniform
+	-viewMatrix - store negative camera position(using to move objects in opposite side from the camera moving side for creating camera movement effect). Responses for movement object relative to the camera, and also for its rotation relative to the camera.
+
+	-cubeMap - stored first skybox texture (for example for the day)
+
+	-cubeMap2 - stored secound skybox texture (for example for the night)
+
+	-blendFactor - setting how much of each texture(at alpha color) must be used for rendering final skybox texture. 
+		calculating:
+			mix(a,b,c) - used for calculating mix of "a" color and "b" color, where "c" is a proportion of "b" color
+
+	-fogColour - storing color of fog
+
+	-lowerLimit - used for creation fog effect more realistic when we using skybox. Under this limit skybox texture will covered by fog color. Between "lowerLimit" and "upperLimit" will be used gradient for creating smooth transition between fog and sky texture. Explanation: add#3.png
+
+	-upperLimit - used for creation fog effect more realistic when we using skybox. Above this limit skybox texture will covered by sky texture. Between "lowerLimit" and "upperLimit" will be used gradient for creating smooth transition between fog and sky texture. Explanation: add#3.png
+
+	code:
+
+	-dayTexture - getting and storing current pixel color from "cubeMap" with coords "textureCoords"
+		calculating:
+			texture(a, b) - colour of pixel with coords "a" at "b" texture
+
+	-nightTexture - getting and storing current pixel color from "cubeMap2" with coords "textureCoords"
+		calculating:
+			texture(textureSampler, pass_textureCoords) - colour of pixel with coords "pass_textureCoords" at "textureSampler" texture
+
+	-finalColour - final color for the current pixel which created from getting colors of two pixels from "cubeMap"(dayTexture) and "cubeMap2"(nightTexture) where color of pixel from "cubeMap2"(nightTexture) getting at proportion "blendFactor".
+
+	-factor - used for determination amount of texture color at final pixel color. It's used for making fog effect more realistic(add#3.png) 
+		calculating:
+			clamp(a,b,c) - limit/constrain value "a" at diapason from "b" to "c"

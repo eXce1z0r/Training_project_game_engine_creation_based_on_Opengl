@@ -1,0 +1,61 @@
+in - variables by which we put info into shader
+out - variables which values we returns as a result
+
+vertexShader:
+	-all "out" variables going to fragmentShader
+
+	-viewMatrix - store negative camera position
+
+	-worldPosition - current position of object which include it's current transformation
+
+	-transformationMatrix - using in calculation when we rotate object
+
+	-surfaceNormal - vertex normal
+		calculating:
+			surfaceNormal = (transformationMatrix * vec4(normal, 0.0)).xyz;// we makeing from normal 4d matrix like a transformationMatrix to multiply them 				and then get from result of their multiply x,y,z dimensions
+
+	-toLightVector - normal from vertex to light source
+
+	-toCameraVector - vector which aimed from point to the camera
+		calculating:
+			toCameraVector = (inverse(viewMatrix) * vec4(0.0,0.0,0.0,1.0)).xyz - worldPosition.xyz;
+			inverse(a); - return inverted value of "a" if it was 1 then it returns -1 and if "a" was equal to -1 then it return 1
+			(inverse(viewMatrix) * vec4(0.0,0.0,0.0,1.0)).xyz - we multiplying to make result of inversing of viewMatrix 4d and get just values of x,y and z axis
+
+fragmentShader:
+	-unitNormal - checking that size of object have no affect on result of dot product(скалярное произведение)
+		calculating:
+			normalize() - make size of normals equal to one, but direction of vectors stays exactly the same
+
+	-unitLightVector - vector which aimed from vertex to light source
+
+	-nDotl - represent how bright this pixel should be
+		calculating:
+			 dot(a,b) - then more distance between "a" and "b" then less value will be. If "a" and "b" parallel then value will be 1, if ange between them 90 grad 			then value will be 0
+
+	-brightness - check that result of variable "nDotl" between 0 and 1 
+		calculating:
+			max(a,b) - compare "a" and "b" and return as a result bigger value
+			IN OUR CASE "b" regulates minimal light which object can reflects
+
+	-diffuse - final light of current pixel
+
+	-unitVectorToCamera - this is the vector which aimed from reflection part to the camera
+
+	-lightDirection - it is vector which aimed from light source to vertex actually this is a vector "unitLightVector" which aimed to another side
+
+	-reflectedLightDirection - this is vector which calculate reflecting light direction by using function reflect(a,b)
+		calculating:
+			reflect(side_from_which_light_shine_on_vertex, vertex_normal) - function which calculate reflection effect
+
+	-specularFactor - calculating by using function dot(a,b) angle between normal 1) reflection of light which calculated in variable "reflectedLightDirection"  2) from 	vertex to camera. Also it indicate how bright the specular light whithout any damping(амортизация/отражение) should be.
+
+	-dampedFactor - create a material damping
+
+	-finalSpecular - final specular light value. Light amount which reflects from object
+
+	-out_Color - final colour of pixel
+		calculating:
+			vec4(diffuse,1.0) - making from "diffuse" 4d vector because "texture" is 4d vector
+			texture(textureSampler, pass_textureCoords) - texture colour
+			

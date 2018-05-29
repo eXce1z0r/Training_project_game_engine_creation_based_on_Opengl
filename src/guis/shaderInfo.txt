@@ -1,0 +1,6 @@
+1)guiVertexShader
+	-vec4(position, 0.0, 1.0);// used to calculate GUI position on the game screen so it always displays on the screen. Thats why we set z coord on 0 and scale on 1. And after this we multiply result on transformationMatrix to move GUI texture on the screen
+ 
+	-textureCoords = vec2((position.x+1.0)/2.0, 1 - (position.y+1.0)/2.0);// used because game display window have coords (-1;1)(-1;-1)(1;-1)(1;1) and OpenGL Texture have coords (0;0)(0;1)(1;1)(1;0), so we must convert "game display window" coords into OpenGL Texture coords (Explanation screen stored by the way "explanations\add#2.png" )
+
+2)guiFragmentShader
